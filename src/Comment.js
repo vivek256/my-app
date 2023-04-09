@@ -47,12 +47,7 @@ export default function Comment({
           if (arr[x]["id"] == id) {
             details.parentId = obj["id"];
             details.position = x;
-            // for (let z in obj["replies"]) {
-            //   if (obj["replies"][z]["id"] == id) {
-            //     details.position = z;
-            //     break;
-            //   }
-            // }
+           
             break;
           }
 
