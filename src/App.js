@@ -146,21 +146,7 @@ export default function App() {
       </div></div>
     <div>
       {commentStructure.comments.map((val, index) => {
-        let value = <Comment id={val.id} data={val} deleteReply={deleteReply} addReply={addReply} currentUser={commentStructure.currentUser} />;
-
-        return val.replies === undefined || val.replies.length === 0 ? (
-          value
-        ) : (
-          // <div className="comment-parent-container-div">
-          <div>
-            <Comment data={val} id={val.id} addReply={addReply} deleteReply={deleteReply} currentUser={commentStructure.currentUser} />
-            {val.replies.map((value, i) => {
-
-              return <Comment id={value.id} data={value} addReply={addReply} deleteReply={deleteReply} currentUser={commentStructure.currentUser} />;
-            })}
-          </div>
-          // </div>
-        );
+        return <Comment id={val.id} data={val} addReply={addReply} deleteReply={deleteReply} currentUser={commentStructure.currentUser} />;
       })}
     </div></>
   );
