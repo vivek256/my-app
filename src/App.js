@@ -1,152 +1,126 @@
 import "./styles.css";
+import data from "./data";
 import Comment from "./Comment";
-import { useState, useEffect } from "react";
-import data from "./data.json";
-import TextArea from "./Textarea";
-let j = 9201921;
-
-
+import useNode from "./customHook/useNode";
+import { useState ,useEffect} from "react";
 
 export default function App() {
+  let value = data.comments;
+  console.log(value)
+  
   const getLocalItems = () => {
     let list = localStorage.getItem('items');
-    console.log(list)
+    
     if (list) {
       return JSON.parse(localStorage.getItem('items'));
     } else {
-      return data;
+      return value;
     }
   }
 
-  const [commentStructure, setCommentStructure] = useState(getLocalItems());
-  const [text, setText] = useState({ id: ++j, user: commentStructure.currentUser, replies: [] });
-  const [isPublish, setIsPublish] = useState(false);
+
+  const [commentsData, setCommentsData] = useState(getLocalItems());
+  const [input,setInput] = useState("")
 
   useEffect(() => {
-    localStorage.setItem('items', JSON.stringify(commentStructure));
-  }, [commentStructure]);
+    localStorage.setItem('items', JSON.stringify(commentsData));
+  }, [commentsData]);
+
+  const { insertNode, editNode, deleteNode } = useNode();
+
+  const handleInsertNode = (folderId, item,score) => {
+    const finalStructure = insertNode(commentsData, folderId, item,score);
+    
+
+    setCommentsData(finalStructure);
+  };
+
+  const handleEditNode = (parentId, value, position, id) => {
+    const finalStructure = editNode(
+      commentsData,
+      parentId,
+      value,
+      position,
+      id
+    );
+    setCommentsData(finalStructure);
+  };
+
+  const handleDeleteNode = (folderId) => {
+    const finalStructure = deleteNode(commentsData, folderId);
+    setCommentsData([...finalStructure]);
+  };
 
 
 
-  function deleteReply(val) {
 
-    const newCommentStructure = { ...commentStructure };
+function autoResize(e) {
+  e.target.style.height = "auto";
+  e.target.style.height = e.target.scrollHeight + "px";
 
+  setInput(e.target.value);
+}
 
-    function removeComment(obj) {
-      for (let x in obj) {
-        if (obj[x].id == val) {
-
-          obj.splice(x, 1);
-          break;
-        }
-        if (obj[x].replies !== undefined) {
-          removeComment(obj[x].replies);
-        }
-      }
-
+const handleComment = (e) => {
+  if (e.keyCode == 13 && !e.shiftKey) {
+    if (input.trim().length !== 0) {
+      
+      const newData = [...commentsData];
+      newData.push({
+        id: new Date().getTime(),
+        content: input,
+        user:data.currentUser,
+        replies: []
+      });
+     setCommentsData(newData);
+     setInput("");
+     e.target.value=""
     }
-
-    removeComment(newCommentStructure.comments)
-
-    setCommentStructure(newCommentStructure);
-
-
   }
-
-  function addReply(val) {
-    const newCommentStructure = { ...commentStructure };
-
-    if (isPublish) {
-      newCommentStructure.comments.push({ ...text })
-
-    } else {
-
-
-      for (let x of newCommentStructure.comments) {
-        if (x['id'] === val[1]) {
-          if (x['replies'].length == 0) {
-            x['replies'] = []
-          }
-          x['replies'].push(val[0]);
-          break;
-        }
-
-        for (let y of x['replies']) {
-          if (y['id'] === val[1]) {
-            x['replies'].push(val[0]);
-            break;
-          }
-        }
-
-      }
-
-    }
+};
 
 
 
-    setCommentStructure(newCommentStructure);
-
-
-  }
-
-  function autoResize(e) {
-    e.target.style.height = "auto";
-    e.target.style.height = e.target.scrollHeight + "px";
-
-    const newText = { ...text };
-
-
-
-
-    newText["content"] = e.target.value;
-    setText(newText);
-  }
-
-  function addComment(e) {
-    if (e.keyCode == 13 && !e.shiftKey && e.target.value.length != 0) {
-
-      addReply([text, text.id])
-      e.target.value = ''
-
-    }
-
-    if (e.target.value.length != 0) {
-
-      setIsPublish(true);
-    } else if (e.target.value.length == 0) {
-      setIsPublish(false);
-    }
-
-
-  }
-
-  console.log(commentStructure);
   return (<>
-    <div className="publish">
-      {'@' + commentStructure.currentUser.username}
+  <div className="publish">
+  {'@' + data.currentUser.username}
       <br />
       <br />
       <img
         className="user-img"
-        src={commentStructure.currentUser.image.png.substr(2)}
+        src={data.currentUser.image.png.substr(2)}
         alt="user"
       />
       <br />
-      <div className="reply new-reply" style={{ marginLeft: '340px' }}>
-
-        <div>
-          <textarea onInput={(e) => autoResize(e)} onKeyUp={addComment} autofocus>{
-
-            commentStructure.content
-
-          }</textarea>
-          <br />
-        </div>
-      </div></div>
+       <div className="reply new-reply" style={{marginLeft:'350px'}}>
+              <div>
+                <textarea
+                  className="reply new-reply"
+                  autoFocus
+                  onInput={(e) => autoResize(e)}
+                  onKeyUp={handleComment}
+                ></textarea>
+                
+              </div>
+            </div></div>
     <div>
-      {commentStructure.comments.map((val, index) => {
-        return <Comment id={val.id} data={val} addReply={addReply} deleteReply={deleteReply} currentUser={commentStructure.currentUser} />;
+      {commentsData.map((cmnt) => {
+        return (
+          <Comment
+            handleInsertNode={handleInsertNode}
+            handleDeleteNode={handleDeleteNode}
+            handleEditNode={handleEditNode}
+            id={cmnt.id}
+            replies={cmnt.replies}
+            parentData={commentsData}
+            content={cmnt.content}
+            image={cmnt.user.image}
+            username={cmnt.user.username}
+            currentUser={data.currentUser.username}
+            replyingTo={cmnt.replyingTo}
+            cmntScore={cmnt.score}
+          />
+        );
       })}
     </div></>
   );
