@@ -132,9 +132,7 @@ export default function Comment({
           <div className="comment-outer-container">
             <div className="comment-container">
               <b className="username">{username}</b>
-              {replyingTo === undefined ? null : <><span >  <FontAwesomeIcon icon={faReply} flip="horizontal" size="2xs" /></span>
-              <b className="username">{replyingTo}</b></>}
-              <div className="comment">{content}</div>
+               <div className="comment">{content}</div>
               <FontAwesomeIcon className='icon' onClick={handleUp} icon={faAngleUp} size="2xs" />
             <FontAwesomeIcon className='icon' onClick={handleDown} icon={faAngleUp} rotation={180} style={{ marginBottom: '.3px', marginLeft: '13px' }} size="2xs" /><br />
             <span className="score">+{score.up}</span><span className="score" style={{ marginLeft: '27px' }}>-{score.down}</span>
@@ -150,7 +148,7 @@ export default function Comment({
             ) : (
               <>
                 <Action type={"Reply"} handleClick={() => setShowInput(true)} />
-                <Action type={"Edit"} handleClick={(e) => handleEdit()} />
+                {username === currentUser ? <Action type={"Edit"} handleClick={(e) => handleEdit()} /> : null }
                 <Action type={"Delete"} handleClick={() => handleDelete()} />
               </>
             )}
