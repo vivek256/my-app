@@ -1,6 +1,6 @@
 import Action from "./Action";
 import data from "./data";
-import { useState } from "react";
+import React,{ useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faReply, faAngleUp } from '@fortawesome/free-solid-svg-icons'
 
