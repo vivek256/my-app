@@ -2,7 +2,8 @@ import "./styles.css";
 import data from "./data";
 import Comment from "./Comment";
 import useNode from "./customHook/useNode";
-import { useState ,useEffect} from "react";
+import React,{ useState ,useEffect} from "react";
+
 
 export default function App() {
   let value = data.comments;
