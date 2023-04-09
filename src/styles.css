@@ -14,11 +14,10 @@
 
 .new-reply {
   transform-origin: 10% 0;
-  animation: append-animate .2s ease;
+  animation: append-animate 0.2s ease;
 }
 
 .icon {
-
   /* margin:2px 10px 0 10px; */
   /* padding: 2px; */
   margin-left: 14px;
@@ -26,7 +25,6 @@
 }
 
 .score {
-
   font-size: 10px;
   margin-left: 12px;
   width: 10px;
@@ -35,8 +33,6 @@
 .icon:hover {
   cursor: pointer;
   font-size: 12px;
-
-
 }
 
 @keyframes append-animate {
@@ -91,7 +87,6 @@
   margin-left: 10px;
 }
 
-
 .comment-container .username:hover {
   text-decoration: underline;
   cursor: pointer;
@@ -108,12 +103,10 @@
 .comment-outer-container button:hover {
   text-decoration: underline;
   cursor: pointer;
-
 }
 
 .cancelReply {
   font-size: 10px;
-
 }
 
 .cancelReply:hover {
@@ -139,7 +132,6 @@
 }
 
 .comment-container:last-child:hover {
-
   padding: 10%;
   cursor: pointer;
 }
@@ -168,7 +160,6 @@
   text-align: center;
   font-weight: bold;
   font-size: 25px;
-
 }
 
 .comment-parent-container img:hover {
