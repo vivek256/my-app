@@ -2,33 +2,34 @@ import data from "../data";
 
 const useNode = () => {
   const insertNode = function (tree, commentId, item,score) {
-   
-    if (tree.id === commentId) {
-      tree.replies.push({
-        id: new Date().getTime(),
-        content: item,
-        user:data.currentUser,
-        replies: [],
-        score:score,
-      });
+   function addNode(val){
 
-      return tree;
+    if(Array.isArray(val)){
+
+    for(let x of val){
+
+        if(x['id'] === commentId){
+            x.replies.push({
+              id: new Date().getTime(),
+              content: item,
+              user:data.currentUser,
+              replies: [],
+              score:score,
+            });
+            break;
+        }
+
+        addNode(x['replies']);
+
+        
     }
+}
+}
 
-    let latestNode = [];
-    if (Array.isArray(tree)) {
-      latestNode = tree.map((obj) => {
-        return insertNode(obj, commentId, item);
-      });
+addNode(tree)
 
-      return [...tree];
-    } else {
-      latestNode = tree.replies.map((obj) => {
-        return insertNode(obj, commentId, item);
-      });
-
-      return { ...tree };
-    }
+return [...tree];
+    
   };
 
   const editNode = function (tree, parentId, value, position, id) {
