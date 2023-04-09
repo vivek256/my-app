@@ -1,4 +1,5 @@
 import data from "../data";
+import React from 'react';
 
 const useNode = () => {
   const insertNode = function (tree, commentId, item,score) {
