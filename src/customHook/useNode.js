@@ -34,33 +34,38 @@ return [...tree];
 
   const editNode = function (tree, parentId, value, position, id) {
     
-    if (parentId === undefined) {
-      tree[position].id = new Date().getTime();
-      tree[position].content = value;
-      return [...tree];
-    }
-    if (tree.id === parentId) {
-      
-      tree.replies[position].content = value;
-      tree.replies[position].id = new Date().getTime();
-      
-      return tree;
-    }
+    function editNodeFinal(tree,position,parentId){
 
-    let latestNode = [];
-    if (Array.isArray(tree)) {
-      latestNode = tree.map((obj) => {
-        return editNode(obj, parentId, value, position, id);
-      });
+      if(Array.isArray(tree)){
 
-      return [...tree];
-    } else {
-      latestNode = tree.replies.map((obj) => {
-        return editNode(obj, parentId, value, position, id);
-      });
+          if(parentId === undefined){
+              tree[position].id = new Date().getTime();
+              tree[position].content = value;
+            return
+          }
 
-      return { ...tree };
-    }
+      for(let x of tree){
+
+          if(x['id'] == parentId){
+              x.replies[position].content= value;
+              x.replies[position].id = new Date().getTime();
+              break;
+          }
+
+
+          if(parentId !== undefined){
+            editNodeFinal(x['replies'],position,parentId);
+          }
+          
+
+          
+      }
+  }
+  }
+
+  editNodeFinal(tree,position,parentId);
+
+  return [...tree];
   };
 
   const deleteNode = function (tree, id) {
