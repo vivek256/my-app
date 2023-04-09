@@ -1,23 +1,28 @@
-import "./styles.css";
+import Action from "./Action";
+import data from "./data";
+import { useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faReply, faAngleUp } from '@fortawesome/free-solid-svg-icons'
-import React, { useRef, useState } from "react";
-import TextArea from "./Textarea";
 
-
-
-export default function Comment(props) {
-
-  const commentRef = useRef(null)
-  const [replyState, setReplyState] = useState(false);
+export default function Comment({
+  content,
+  replies,
+  username,
+  currentUser,
+  handleEditNode,
+  handleDeleteNode,
+  handleInsertNode,
+  id,
+  parentData,
+  image,
+  replyingTo,
+  cmntScore
+}) {
+  const [editMode, setEditMode] = useState(false);
+  const [showInput, setShowInput] = useState(false);
   const [score, setScore] = useState({ up: 0, down: 0 });
-  const [isEditing, setIsEditing] = useState(false);
-  const [id, setId] = useState(null)
+  const [input, setInput] = useState("");
 
-  function handleReplyState() {
-    setId(props.id);
-    setReplyState(!replyState);
-  }
 
   function handleDown(e) {
     setScore((prev) => {
@@ -34,75 +39,170 @@ export default function Comment(props) {
     })
   }
 
-  function handleDelete() {
+  const addComment = () => {
+    if (editMode) {
+      const details = {};
+      function checkParent(arr, obj = {}) {
+        for (let x in arr) {
+          if (arr[x]["id"] == id) {
+            details.parentId = obj["id"];
+            details.position = x;
+            // for (let z in obj["replies"]) {
+            //   if (obj["replies"][z]["id"] == id) {
+            //     details.position = z;
+            //     break;
+            //   }
+            // }
+            break;
+          }
 
-    if (id !== null) {
+          for (let y in arr[x]["replies"]) {
+            if (arr[x]["replies"][y]["id"] == id) {
+              details.parentId = arr[x]["id"];
+              details.position = y;
+              break;
+            }
+            checkParent(arr[x]["replies"][y]["replies"], arr[x]["replies"][y]);
+          }
+        }
+      }
 
-      setId(null)
-      setIsEditing(false)
+      checkParent(data.comments, {});
+      setEditMode(false);
 
-
+      handleEditNode(details.parentId, input, details.position, id,cmntScore+score+score.up-score.down);
+      setShowInput(false);
+      setInput("");
+    } else {
+      handleInsertNode(id, input ,cmntScore+score.up-score.down);
+      setShowInput(false);
+      setInput("");
     }
+  };
 
-    props.deleteReply(id ? id : commentRef.current.id);
+  const handleDelete = () => {
+    handleDeleteNode(id);
+  };
 
+  const handleEdit = (e) => {
+    setEditMode(true);
+  };
 
+  function autoResize(e) {
+    e.target.style.height = "auto";
+    e.target.style.height = e.target.scrollHeight + "px";
 
-
-
+    setInput(e.target.value);
   }
 
-
-
-  function handleEdit() {
-
-    commentRef.current.className = 'hide';
-    setIsEditing(true)
-
-    setReplyState(!replyState);
-
-  }
-
-
+  const handleComment = (e) => {
+    if (e.keyCode == 13 && !e.shiftKey) {
+      if (input.trim().length !== 0) {
+        addComment(e);
+      }
+    }
+  };
 
   return (
     <>
-      <div id={props.id}
-        ref={commentRef}
-        className={"comment-parent-container"}
-        style={props.data.replies === undefined ? { marginLeft: "40px" } : null}
-      >
-        <img
-          src={props.data.user.image.png.substr(2)}
+      {editMode ? (
+        <div className="reply new-reply">
+          <div>
+            <textarea
+              className="reply new-reply"
+              autoFocus
+              onInput={(e) => autoResize(e)}
+              onKeyUp={handleComment}
+            >
+              {editMode ? content : input}
+            </textarea>
+            <Action
+              type={"Cancel"}
+              className="cancelReply"
+              handleClick={() => setEditMode(false)}
+            />
+          </div>
+        </div>
+      ) : (
+        <div className={"comment-parent-container"}>
+          <img
+          src={image.png.substr(2)}
           alt="user"
           style={
-            props.data.replies === undefined
+              replies === undefined
               ? { width: "25px", height: "25px" }
               : null
           }
         />
-        <div className="comment-outer-container">
-          <div className="comment-container">
-            <b className="username">{props.data.user.username}</b>
-            {props.data.replyingTo === undefined ? null : <><span >  <FontAwesomeIcon icon={faReply} flip="horizontal" size="2xs" /></span>
-              <b className="username">{props.data.replyingTo}</b></>}
-
-
-            <div className="comment">{props.data.content}</div>
-            <FontAwesomeIcon className='icon' onClick={handleUp} icon={faAngleUp} size="2xs" />
+          <div className="comment-outer-container">
+            <div className="comment-container">
+              <b className="username">{username}</b>
+              {replyingTo === undefined ? null : <><span >  <FontAwesomeIcon icon={faReply} flip="horizontal" size="2xs" /></span>
+              <b className="username">{replyingTo}</b></>}
+              <div className="comment">{content}</div>
+              <FontAwesomeIcon className='icon' onClick={handleUp} icon={faAngleUp} size="2xs" />
             <FontAwesomeIcon className='icon' onClick={handleDown} icon={faAngleUp} rotation={180} style={{ marginBottom: '.3px', marginLeft: '13px' }} size="2xs" /><br />
             <span className="score">+{score.up}</span><span className="score" style={{ marginLeft: '27px' }}>-{score.down}</span>
+            </div>
+            {editMode ? (
+              <>
+                <Action type={"Save"} />
+                <Action
+                  type={"Cancel"}
+                  handleClick={() => setEditMode(false)}
+                />
+              </>
+            ) : (
+              <>
+                <Action type={"Reply"} handleClick={() => setShowInput(true)} />
+                <Action type={"Edit"} handleClick={(e) => handleEdit()} />
+                <Action type={"Delete"} handleClick={() => handleDelete()} />
+              </>
+            )}
           </div>
-          {props.currentUser.username === props.data.user.username ? <><button onClick={handleEdit} >Edit</button><button onClick={handleDelete}>Delete</button></> : null}
-          <button onClick={() => handleReplyState()}>Reply</button>
         </div>
-      </div>
-      {replyState ? <TextArea addReply={props.addReply} deleteReply={handleDelete} handleReplyState={handleReplyState} replyingTo={props.data.user.username} replyId={props.id} currentUser={props.currentUser} content={props.data.content} isEditing={isEditing} /> : null}
-      <div style={{marginLeft:'25px'}}>
-        {props.data.replies?.map((val) => {
-          return <Comment id={val.id} data={val} addReply={props.addReply} deleteReply={props.deleteReply} currentUser={props.currentUser} />
-        })}
+      )}
 
+      <div style={{ marginLeft: "25px" }}>
+        {showInput ? (
+          <>
+            <div className="reply new-reply">
+              <div>
+                <textarea
+                  contentEditable={editMode}
+                  suppressContentEditableWarning={editMode}
+                  className="reply new-reply"
+                  autoFocus
+                  onInput={(e) => autoResize(e)}
+                  onKeyUp={handleComment}
+                ></textarea>
+                <Action
+                  type={"Cancel"}
+                  className="cancelReply"
+                  handleClick={() => setShowInput(false)}
+                />
+              </div>
+            </div>
+          </>
+        ) : null}
+        {replies?.map((cmnt) => {
+          return (
+            <Comment
+              handleInsertNode={handleInsertNode}
+              handleDeleteNode={handleDeleteNode}
+              handleEditNode={handleEditNode}
+              replies={cmnt.replies}
+              content={cmnt.content}
+              username={cmnt.user.username}
+              currentUser={currentUser}
+              id={cmnt.id}
+              image={cmnt.user.image}
+              parentData={parentData}
+              replyingTo={cmnt.replyingTo}
+              cmntScore={cmnt.score}
+            />
+          );
+        })}
       </div>
     </>
   );
