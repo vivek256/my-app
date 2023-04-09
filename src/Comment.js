@@ -98,6 +98,12 @@ export default function Comment(props) {
         </div>
       </div>
       {replyState ? <TextArea addReply={props.addReply} deleteReply={handleDelete} handleReplyState={handleReplyState} replyingTo={props.data.user.username} replyId={props.id} currentUser={props.currentUser} content={props.data.content} isEditing={isEditing} /> : null}
+      <div style={{marginLeft:'25px'}}>
+        {props.data.replies?.map((val) => {
+          return <Comment id={val.id} data={val} addReply={props.addReply} deleteReply={props.deleteReply} currentUser={props.currentUser} />
+        })}
+
+      </div>
     </>
   );
 }
