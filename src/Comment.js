@@ -62,7 +62,7 @@ export default function Comment({
         }
       }
 
-      checkParent(data.comments, {});
+      checkParent(parentData, {});
       setEditMode(false);
 
       handleEditNode(details.parentId, input, details.position, id,cmntScore+score+score.up-score.down);
